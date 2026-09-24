@@ -1,107 +1,368 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0d0d0f" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d0f">
   <title>VCR - Sorteio de Times</title>
+
   <style>
     * { box-sizing: border-box; }
+
     :root {
-      --preto: #0d0d0f;
-      --painel: #17171a;
-      --campo: #26262b;
-      --borda: #3d3d45;
-      --turquesa: #199999;
-      --turquesa-claro: #36bcbc;
-      --texto: #f7f7f8;
+      --bg: #0d0d0f;
+      --panel: #17171a;
+      --panel2: #202024;
+      --field: #26262b;
+      --border: #3d3d45;
+      --accent: #199999;
+      --accentLight: #36bcbc;
+      --text: #f7f7f8;
       --muted: #a2a2aa;
+      --danger: #ff8989;
     }
+
     body {
       margin: 0;
       min-height: 100vh;
       padding: 20px;
       font-family: Arial, Helvetica, sans-serif;
-      background: radial-gradient(circle at top, rgba(25,153,153,.15), transparent 34%), var(--preto);
-      color: var(--texto);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(25,153,153,.15), transparent 34%),
+        var(--bg);
     }
-    .container { width: 100%; max-width: 920px; margin: 0 auto; }
-    .header { text-align: center; margin-bottom: 24px; }
-    .logo { width: min(290px, 76vw); display: block; margin: 0 auto 12px; border-radius: 14px; }
-    h1 { margin: 0; font-size: clamp(28px, 5vw, 42px); }
-    .subtitle { margin-top: 7px; color: var(--muted); }
+
+    button, textarea, select { font: inherit; }
+
+    .container {
+      width: 100%;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      width: min(290px, 76vw);
+      display: block;
+      margin: 0 auto 12px;
+      border-radius: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 42px);
+    }
+
+    .subtitle {
+      margin-top: 7px;
+      color: var(--muted);
+    }
+
     .card {
       padding: 20px;
       border: 1px solid #303036;
       border-radius: 18px;
       background: rgba(23,23,26,.97);
     }
-    label { display: block; margin-bottom: 8px; font-weight: 700; }
+
+    .section + .section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #2e2e33;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    textarea, select {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      background: var(--field);
+      color: var(--text);
+      font-size: 16px;
+    }
+
     textarea {
-      width: 100%; min-height: 210px; padding: 13px 14px; resize: vertical;
-      border: 1px solid var(--borda); border-radius: 10px; outline: none;
-      background: var(--campo); color: var(--texto); font: inherit; font-size: 16px;
+      min-height: 210px;
+      resize: vertical;
     }
-    textarea:focus { border-color: var(--turquesa-claro); box-shadow: 0 0 0 3px rgba(54,188,188,.12); }
-    .info { margin-top: 6px; color: var(--muted); font-size: 14px; }
-    .times-config { margin-top: 24px; text-align: center; }
-    .times-config label { margin-bottom: 10px; text-align: center; }
-    .seletor-times { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto; }
+
+    textarea:focus, select:focus {
+      border-color: var(--accentLight);
+      box-shadow: 0 0 0 3px rgba(54,188,188,.12);
+    }
+
+    .info {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .times-config {
+      text-align: center;
+    }
+
+    .seletor-times {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
     .controle-time {
-      width: 52px; min-width: 52px; height: 52px; flex: 0 0 52px; padding: 0;
-      border: 1px solid #44444c; border-radius: 12px; background: #303036;
-      color: var(--texto); font-size: 29px; font-weight: 700; line-height: 1;
-      cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+      width: 52px;
+      min-width: 52px;
+      height: 52px;
+      padding: 0;
+      border: 1px solid #44444c;
+      border-radius: 12px;
+      background: #303036;
+      color: var(--text);
+      font-size: 29px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
+
     .controle-time:active { transform: scale(.96); }
     .controle-time:disabled { opacity: .35; cursor: not-allowed; }
+
     .numero-times {
-      width: 78px; height: 52px; display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--borda); border-radius: 12px; background: var(--campo);
-      font-size: 25px; font-weight: 800; user-select: none;
+      width: 78px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--field);
+      font-size: 25px;
+      font-weight: 800;
+      user-select: none;
     }
-    .acoes { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
-    .acoes button {
-      min-width: 190px; padding: 14px 18px; border: 0; border-radius: 10px;
-      color: white; font-size: 16px; font-weight: 800; cursor: pointer;
-      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+
+    .separacao-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
     }
-    .sortear { background: var(--turquesa); }
+
+    .separacao-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .toggle-btn {
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 1px solid #3d5555;
+      border-radius: 10px;
+      background: rgba(25,153,153,.08);
+      color: var(--accentLight);
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .toggle-btn.ativo {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .separacao-box {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid #34343a;
+      border-radius: 12px;
+      background: var(--panel2);
+    }
+
+    .separacao-box.ativo { display: block; }
+
+    .separacao-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
+    .slot {
+      min-width: 0;
+    }
+
+    .slot-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .slot-num {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(25,153,153,.17);
+      color: var(--accentLight);
+      font-weight: 900;
+    }
+
+    .resumo-separacao {
+      margin-top: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      background: #18181b;
+      color: #c9c9cf;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .acoes {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .btn {
+      min-height: 46px;
+      min-width: 190px;
+      padding: 11px 16px;
+      border: 0;
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .sortear { background: var(--accent); }
     .limpar { background: #303036; }
-    .erro { min-height: 20px; margin-top: 14px; color: #ff8989; font-weight: 700; text-align: center; }
-    .resultado-titulo { display: none; margin: 30px 0 14px; font-size: 24px; text-align: center; }
-    .times { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-    .time {
-      padding: 18px; border: 1px solid #34343a; border-top: 4px solid var(--turquesa);
-      border-radius: 14px; background: linear-gradient(180deg, #1d1d21, #151517);
+
+    .erro {
+      min-height: 20px;
+      margin-top: 14px;
+      color: var(--danger);
+      font-weight: 700;
+      text-align: center;
     }
-    .time h2 { margin: 0 0 12px; color: var(--turquesa-claro); font-size: 20px; }
-    .time ul { margin: 0; padding-left: 22px; line-height: 1.8; }
-    .contador { margin-top: 10px; color: #8e8e97; font-size: 13px; }
-    #selfTest { display: none; }
+
+    .resultado-titulo {
+      display: none;
+      margin: 30px 0 14px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .times {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .time {
+      padding: 18px;
+      border: 1px solid #34343a;
+      border-top: 4px solid var(--accent);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #1d1d21, #151517);
+    }
+
+    .time h2 {
+      margin: 0 0 12px;
+      color: var(--accentLight);
+      font-size: 20px;
+    }
+
+    .time ul {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.8;
+    }
+
+    .fixado {
+      color: var(--accentLight);
+      font-weight: 800;
+    }
+
+    .contador {
+      margin-top: 10px;
+      color: #8e8e97;
+      font-size: 13px;
+    }
+
+    #selfTest {
+      display: none;
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #111;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
+    body.test-mode #selfTest { display: block; }
+
     @media (max-width: 600px) {
       body { padding: 14px; }
       .card { padding: 16px; }
-      .acoes button { width: 100%; }
+      .btn { width: 100%; }
+      .toggle-btn { width: 100%; }
     }
   </style>
 </head>
+
 <body>
   <main class="container">
     <header class="header">
-      <img class="logo" src="logo-vcr.webp" alt="Logo VCR - Vôlei, Chimarrão e Resenha" />
+      <img
+        class="logo"
+        src="logo-vcr.webp"
+        alt="Logo VCR - Vôlei, Chimarrão e Resenha"
+      >
       <h1>Sorteio de Times</h1>
       <div class="subtitle">VCR • Vôlei • Chimarrão • Resenha</div>
     </header>
 
     <section class="card">
-      <div>
+      <div class="section">
         <label for="nomes">Jogadores</label>
-        <textarea id="nomes" placeholder="Digite um jogador por linha:&#10;Gabriel&#10;João&#10;Pedro&#10;Lucas&#10;Marcos"></textarea>
+        <textarea id="nomes" placeholder="Digite um jogador por linha:
+Gabriel
+Matheus
+João
+Pedro
+Lucas
+Carlos"></textarea>
         <div class="info" id="quantidadeJogadores">0 jogadores adicionados</div>
       </div>
 
-      <div class="times-config">
+      <div class="section times-config">
         <label>Quantidade de times</label>
         <div class="seletor-times">
           <button type="button" class="controle-time" id="menosTime" aria-label="Diminuir quantidade de times">−</button>
@@ -110,9 +371,32 @@
         </div>
       </div>
 
+      <div class="section">
+        <div class="separacao-header">
+          <div>
+            <h2>Separar jogadores entre os times</h2>
+            <div class="info">
+              Opcional. Os jogadores escolhidos serão colocados em times diferentes.
+            </div>
+          </div>
+
+          <button type="button" class="toggle-btn" id="toggleSeparacao">
+            Ativar separação
+          </button>
+        </div>
+
+        <div class="separacao-box" id="separacaoBox">
+          <div class="separacao-grid" id="separacaoGrid"></div>
+
+          <div class="resumo-separacao" id="resumoSeparacao">
+            Nenhum jogador selecionado.
+          </div>
+        </div>
+      </div>
+
       <div class="acoes">
-        <button type="button" class="sortear" id="sortear">🏐 Sortear times</button>
-        <button type="button" class="limpar" id="limpar">Limpar</button>
+        <button type="button" class="btn sortear" id="sortear">🏐 Sortear times</button>
+        <button type="button" class="btn limpar" id="limpar">Limpar</button>
       </div>
 
       <div id="erro" class="erro" aria-live="polite"></div>
@@ -120,7 +404,8 @@
 
     <h2 id="resultadoTitulo" class="resultado-titulo">Times sorteados</h2>
     <section id="resultado" class="times"></section>
-    <div id="selfTest" data-status="not-run"></div>
+
+    <pre id="selfTest"></pre>
   </main>
 
   <script>
@@ -135,6 +420,12 @@
       const quantidadeTimesEl = document.getElementById("quantidadeTimes");
       const menosTimeBtn = document.getElementById("menosTime");
       const maisTimeBtn = document.getElementById("maisTime");
+
+      const toggleSeparacaoBtn = document.getElementById("toggleSeparacao");
+      const separacaoBoxEl = document.getElementById("separacaoBox");
+      const separacaoGridEl = document.getElementById("separacaoGrid");
+      const resumoSeparacaoEl = document.getElementById("resumoSeparacao");
+
       const sortearBtn = document.getElementById("sortear");
       const limparBtn = document.getElementById("limpar");
       const erroEl = document.getElementById("erro");
@@ -143,6 +434,12 @@
       const selfTestEl = document.getElementById("selfTest");
 
       let quantidadeTimes = MIN_TIMES;
+      let separacaoAtiva = false;
+      let selecionadosSeparacao = [];
+
+      function normalizarNome(nome) {
+        return nome.trim().toLocaleLowerCase("pt-BR");
+      }
 
       function obterNomes() {
         return nomesEl.value
@@ -151,15 +448,34 @@
           .filter(function (nome) { return nome.length > 0; });
       }
 
+      function obterDuplicados(nomes) {
+        const vistos = new Set();
+        const duplicados = [];
+
+        nomes.forEach(function (nome) {
+          const chave = normalizarNome(nome);
+          if (vistos.has(chave) && !duplicados.includes(nome)) {
+            duplicados.push(nome);
+          }
+          vistos.add(chave);
+        });
+
+        return duplicados;
+      }
+
       function atualizarContadorJogadores() {
         const quantidade = obterNomes().length;
-        quantidadeJogadoresEl.textContent = quantidade + " " + (quantidade === 1 ? "jogador adicionado" : "jogadores adicionados");
+        quantidadeJogadoresEl.textContent =
+          quantidade + " " + (quantidade === 1 ? "jogador adicionado" : "jogadores adicionados");
       }
 
       function renderizarQuantidadeTimes() {
         quantidadeTimesEl.textContent = String(quantidadeTimes);
         menosTimeBtn.disabled = quantidadeTimes <= MIN_TIMES;
         maisTimeBtn.disabled = quantidadeTimes >= MAX_TIMES;
+
+        selecionadosSeparacao = selecionadosSeparacao.slice(0, quantidadeTimes);
+        renderizarSeparacao();
       }
 
       function aumentarTimes() {
@@ -176,15 +492,250 @@
         }
       }
 
+      function toggleSeparacao() {
+        separacaoAtiva = !separacaoAtiva;
+        toggleSeparacaoBtn.classList.toggle("ativo", separacaoAtiva);
+        separacaoBoxEl.classList.toggle("ativo", separacaoAtiva);
+        toggleSeparacaoBtn.textContent = separacaoAtiva ? "Separação ativa" : "Ativar separação";
+
+        if (!separacaoAtiva) {
+          selecionadosSeparacao = [];
+        }
+
+        renderizarSeparacao();
+      }
+
+      function limparSelecionadosInvalidos() {
+        const validos = new Set(obterNomes().map(normalizarNome));
+
+        selecionadosSeparacao = selecionadosSeparacao
+          .slice(0, quantidadeTimes)
+          .map(function (nome) {
+            return nome && validos.has(normalizarNome(nome)) ? nome : "";
+          });
+      }
+
+      function renderizarSeparacao() {
+        limparSelecionadosInvalidos();
+
+        while (selecionadosSeparacao.length < quantidadeTimes) {
+          selecionadosSeparacao.push("");
+        }
+
+        separacaoGridEl.innerHTML = "";
+
+        if (!separacaoAtiva) {
+          resumoSeparacaoEl.textContent = "Separação desativada.";
+          return;
+        }
+
+        const nomes = obterNomes();
+
+        for (let i = 0; i < quantidadeTimes; i += 1) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "slot";
+
+          const label = document.createElement("div");
+          label.className = "slot-label";
+
+          const numero = document.createElement("span");
+          numero.className = "slot-num";
+          numero.textContent = String(i + 1);
+
+          const texto = document.createElement("span");
+          texto.textContent = "Jogador separado";
+
+          label.appendChild(numero);
+          label.appendChild(texto);
+
+          const select = document.createElement("select");
+          select.setAttribute("aria-label", "Jogador separado " + (i + 1));
+
+          const vazio = document.createElement("option");
+          vazio.value = "";
+          vazio.textContent = "Opcional";
+          select.appendChild(vazio);
+
+          nomes.forEach(function (nome) {
+            const option = document.createElement("option");
+            option.value = nome;
+            option.textContent = nome;
+
+            const jaSelecionadoEmOutro = selecionadosSeparacao.some(function (selecionado, indice) {
+              return indice !== i &&
+                     selecionado &&
+                     normalizarNome(selecionado) === normalizarNome(nome);
+            });
+
+            option.disabled = jaSelecionadoEmOutro;
+            select.appendChild(option);
+          });
+
+          select.value = selecionadosSeparacao[i] || "";
+
+          select.addEventListener("change", function () {
+            selecionadosSeparacao[i] = select.value;
+            renderizarSeparacao();
+          });
+
+          wrapper.appendChild(label);
+          wrapper.appendChild(select);
+          separacaoGridEl.appendChild(wrapper);
+        }
+
+        const escolhidos = selecionadosSeparacao.filter(Boolean);
+
+        if (escolhidos.length === 0) {
+          resumoSeparacaoEl.textContent =
+            "Nenhum jogador selecionado. O sorteio será totalmente aleatório.";
+        } else if (escolhidos.length === 1) {
+          resumoSeparacaoEl.textContent =
+            "Selecione pelo menos 2 jogadores para que a separação tenha efeito.";
+        } else {
+          resumoSeparacaoEl.textContent =
+            escolhidos.join(" • ") +
+            " ficarão em " + escolhidos.length +
+            " times diferentes.";
+        }
+      }
+
       function embaralhar(lista) {
         const copia = lista.slice();
+
         for (let i = copia.length - 1; i > 0; i -= 1) {
           const j = Math.floor(Math.random() * (i + 1));
-          const temporario = copia[i];
+          const tmp = copia[i];
           copia[i] = copia[j];
-          copia[j] = temporario;
+          copia[j] = tmp;
         }
+
         return copia;
+      }
+
+      function obterSelecionadosValidos() {
+        if (!separacaoAtiva) {
+          return [];
+        }
+
+        const vistos = new Set();
+        const resultado = [];
+
+        selecionadosSeparacao.filter(Boolean).forEach(function (nome) {
+          const chave = normalizarNome(nome);
+
+          if (!vistos.has(chave)) {
+            vistos.add(chave);
+            resultado.push(nome);
+          }
+        });
+
+        return resultado;
+      }
+
+      function montarTimes(nomes) {
+        const times = Array.from({ length: quantidadeTimes }, function () { return []; });
+        const separados = obterSelecionadosValidos();
+
+        // Os jogadores selecionados são distribuídos primeiro,
+        // cada um obrigatoriamente em um time diferente.
+        const indicesTimes = embaralhar(
+          Array.from({ length: quantidadeTimes }, function (_, i) { return i; })
+        );
+
+        const separadosEmbaralhados = embaralhar(separados);
+
+        separadosEmbaralhados.forEach(function (nome, indice) {
+          times[indicesTimes[indice]].push(nome);
+        });
+
+        const chavesSeparados = new Set(separados.map(normalizarNome));
+
+        const restantes = embaralhar(
+          nomes.filter(function (nome) {
+            return !chavesSeparados.has(normalizarNome(nome));
+          })
+        );
+
+        restantes.forEach(function (nome) {
+          const menorTamanho = Math.min.apply(
+            null,
+            times.map(function (time) { return time.length; })
+          );
+
+          const candidatos = [];
+
+          times.forEach(function (time, indice) {
+            if (time.length === menorTamanho) {
+              candidatos.push(indice);
+            }
+          });
+
+          const destino = candidatos[Math.floor(Math.random() * candidatos.length)];
+          times[destino].push(nome);
+        });
+
+        return times;
+      }
+
+      function validarSeparacao(times) {
+        const separados = obterSelecionadosValidos();
+
+        for (let i = 0; i < separados.length; i += 1) {
+          for (let j = i + 1; j < separados.length; j += 1) {
+            const a = normalizarNome(separados[i]);
+            const b = normalizarNome(separados[j]);
+
+            const juntos = times.some(function (time) {
+              const membros = new Set(time.map(normalizarNome));
+              return membros.has(a) && membros.has(b);
+            });
+
+            if (juntos) {
+              return false;
+            }
+          }
+        }
+
+        return true;
+      }
+
+      function renderizarTimes(times) {
+        resultadoEl.innerHTML = "";
+        const separados = new Set(obterSelecionadosValidos().map(normalizarNome));
+
+        times.forEach(function (time, indice) {
+          const card = document.createElement("article");
+          card.className = "time";
+
+          const titulo = document.createElement("h2");
+          titulo.textContent = "Time " + (indice + 1);
+
+          const lista = document.createElement("ul");
+
+          time.forEach(function (nome) {
+            const item = document.createElement("li");
+            item.textContent = nome;
+
+            if (separados.has(normalizarNome(nome))) {
+              item.className = "fixado";
+              item.title = "Jogador separado";
+            }
+
+            lista.appendChild(item);
+          });
+
+          const contador = document.createElement("div");
+          contador.className = "contador";
+          contador.textContent =
+            time.length + " " + (time.length === 1 ? "jogador" : "jogadores");
+
+          card.appendChild(titulo);
+          card.appendChild(lista);
+          card.appendChild(contador);
+          resultadoEl.appendChild(card);
+        });
+
+        resultadoTituloEl.style.display = "block";
       }
 
       function sortearTimes() {
@@ -193,82 +744,150 @@
         resultadoTituloEl.style.display = "none";
 
         const nomes = obterNomes();
+
         if (nomes.length < 2) {
           erroEl.textContent = "Adicione pelo menos 2 jogadores.";
-          return false;
+          return null;
         }
+
+        const duplicados = obterDuplicados(nomes);
+
+        if (duplicados.length) {
+          erroEl.textContent =
+            "Existem nomes repetidos. Diferencie os jogadores antes de sortear.";
+          return null;
+        }
+
         if (quantidadeTimes > nomes.length) {
-          erroEl.textContent = "A quantidade de times não pode ser maior que a quantidade de jogadores.";
-          return false;
+          erroEl.textContent =
+            "A quantidade de times não pode ser maior que a quantidade de jogadores.";
+          return null;
         }
 
-        const sorteados = embaralhar(nomes);
-        const times = Array.from({ length: quantidadeTimes }, function () { return []; });
-        sorteados.forEach(function (nome, indice) { times[indice % quantidadeTimes].push(nome); });
+        const separados = obterSelecionadosValidos();
 
-        times.forEach(function (time, indice) {
-          const card = document.createElement("article");
-          card.className = "time";
-          const titulo = document.createElement("h2");
-          titulo.textContent = "Time " + (indice + 1);
-          const lista = document.createElement("ul");
-          time.forEach(function (nome) {
-            const item = document.createElement("li");
-            item.textContent = nome;
-            lista.appendChild(item);
-          });
-          const contador = document.createElement("div");
-          contador.className = "contador";
-          contador.textContent = time.length + " " + (time.length === 1 ? "jogador" : "jogadores");
-          card.appendChild(titulo);
-          card.appendChild(lista);
-          card.appendChild(contador);
-          resultadoEl.appendChild(card);
-        });
+        if (separados.length > quantidadeTimes) {
+          erroEl.textContent =
+            "Há mais jogadores separados do que times disponíveis.";
+          return null;
+        }
 
-        resultadoTituloEl.style.display = "block";
+        const times = montarTimes(nomes);
+
+        if (!validarSeparacao(times)) {
+          erroEl.textContent =
+            "Não foi possível respeitar a separação dos jogadores.";
+          return null;
+        }
+
+        renderizarTimes(times);
+
         if (typeof resultadoTituloEl.scrollIntoView === "function") {
           resultadoTituloEl.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-        return true;
+
+        return times;
       }
 
       function limparTudo() {
         nomesEl.value = "";
         quantidadeTimes = MIN_TIMES;
+        separacaoAtiva = false;
+        selecionadosSeparacao = [];
+
         erroEl.textContent = "";
         resultadoEl.innerHTML = "";
         resultadoTituloEl.style.display = "none";
+
+        toggleSeparacaoBtn.classList.remove("ativo");
+        separacaoBoxEl.classList.remove("ativo");
+        toggleSeparacaoBtn.textContent = "Ativar separação";
+
         atualizarContadorJogadores();
         renderizarQuantidadeTimes();
+        renderizarSeparacao();
+
         nomesEl.focus();
       }
 
+      nomesEl.addEventListener("input", function () {
+        atualizarContadorJogadores();
+        renderizarSeparacao();
+      });
+
       menosTimeBtn.addEventListener("click", diminuirTimes);
       maisTimeBtn.addEventListener("click", aumentarTimes);
+      toggleSeparacaoBtn.addEventListener("click", toggleSeparacao);
       sortearBtn.addEventListener("click", sortearTimes);
       limparBtn.addEventListener("click", limparTudo);
-      nomesEl.addEventListener("input", atualizarContadorJogadores);
 
       atualizarContadorJogadores();
       renderizarQuantidadeTimes();
+      renderizarSeparacao();
 
-      if (window.location.search.indexOf("test=1") !== -1) {
-        const resultados = [];
-        resultados.push(["inicial", quantidadeTimes === 2]);
-        maisTimeBtn.click();
-        resultados.push(["botao_mais", quantidadeTimes === 3 && quantidadeTimesEl.textContent === "3"]);
-        menosTimeBtn.click();
-        resultados.push(["botao_menos", quantidadeTimes === 2 && quantidadeTimesEl.textContent === "2"]);
-        nomesEl.value = "Ana\nBruno\nCarla\nDiego";
+      // Testes automáticos: abra o arquivo adicionando ?test=1 no final.
+      if (window.location.search.includes("test=1")) {
+        document.body.classList.add("test-mode");
+
+        const testes = [];
+
+        function testar(nome, passou) {
+          testes.push({ nome: nome, passou: Boolean(passou) });
+        }
+
+        nomesEl.value =
+          "Gabriel\nMatheus\nJoão\nPedro\nLucas\nCarlos\nRafael\nBruno\nAndré";
         nomesEl.dispatchEvent(new Event("input", { bubbles: true }));
-        maisTimeBtn.click();
-        const sorteioOk = sortearTimes();
-        resultados.push(["contador_jogadores", quantidadeJogadoresEl.textContent.indexOf("4 jogadores") === 0]);
-        resultados.push(["sorteio", sorteioOk && resultadoEl.children.length === 3]);
-        const passou = resultados.every(function (item) { return item[1]; });
-        selfTestEl.textContent = (passou ? "PASS:" : "FAIL:") + resultados.map(function (item) { return item[0] + "=" + item[1]; }).join(",");
-        selfTestEl.setAttribute("data-status", passou ? "pass" : "fail");
+
+        quantidadeTimes = 3;
+        renderizarQuantidadeTimes();
+
+        separacaoAtiva = true;
+        toggleSeparacaoBtn.classList.add("ativo");
+        separacaoBoxEl.classList.add("ativo");
+        selecionadosSeparacao = ["Gabriel", "Matheus", "João"];
+        renderizarSeparacao();
+
+        testar("3 seletores para 3 times", separacaoGridEl.querySelectorAll("select").length === 3);
+
+        let todosValidos = true;
+        let equilibrados = true;
+
+        for (let i = 0; i < 500; i += 1) {
+          const times = montarTimes(obterNomes());
+
+          if (!validarSeparacao(times)) {
+            todosValidos = false;
+            break;
+          }
+
+          const tamanhos = times.map(function (t) { return t.length; });
+          if (Math.max.apply(null, tamanhos) - Math.min.apply(null, tamanhos) > 1) {
+            equilibrados = false;
+            break;
+          }
+        }
+
+        testar("500 sorteios mantêm Gabriel, Matheus e João em times diferentes", todosValidos);
+        testar("500 sorteios mantêm times equilibrados", equilibrados);
+
+        quantidadeTimes = 4;
+        renderizarQuantidadeTimes();
+        testar("ao mudar para 4 times aparecem 4 seletores", separacaoGridEl.querySelectorAll("select").length === 4);
+
+        quantidadeTimes = 2;
+        renderizarQuantidadeTimes();
+        testar("ao reduzir para 2 times ficam 2 seletores", separacaoGridEl.querySelectorAll("select").length === 2);
+
+        const falhas = testes.filter(function (t) { return !t.passou; });
+
+        selfTestEl.dataset.status = falhas.length ? "fail" : "pass";
+        selfTestEl.textContent =
+          (falhas.length ? "FAIL" : "PASS") +
+          "\n" +
+          testes.map(function (t) {
+            return (t.passou ? "✓ " : "✗ ") + t.nome;
+          }).join("\n");
       }
     })();
   </script>
