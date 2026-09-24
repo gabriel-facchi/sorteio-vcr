@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <title>VCR - Sorteio de Times</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --preto: #0d0d0f;
+      --painel: #17171a;
+      --campo: #26262b;
+      --borda: #3d3d45;
+      --turquesa: #199999;
+      --turquesa-claro: #36bcbc;
+      --texto: #f7f7f8;
+      --muted: #a2a2aa;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top, rgba(25,153,153,.15), transparent 34%), var(--preto);
+      color: var(--texto);
+    }
+    .container { width: 100%; max-width: 920px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 24px; }
+    .logo { width: min(290px, 76vw); display: block; margin: 0 auto 12px; border-radius: 14px; }
+    h1 { margin: 0; font-size: clamp(28px, 5vw, 42px); }
+    .subtitle { margin-top: 7px; color: var(--muted); }
+    .card {
+      padding: 20px;
+      border: 1px solid #303036;
+      border-radius: 18px;
+      background: rgba(23,23,26,.97);
+    }
+    label { display: block; margin-bottom: 8px; font-weight: 700; }
+    textarea {
+      width: 100%; min-height: 210px; padding: 13px 14px; resize: vertical;
+      border: 1px solid var(--borda); border-radius: 10px; outline: none;
+      background: var(--campo); color: var(--texto); font: inherit; font-size: 16px;
+    }
+    textarea:focus { border-color: var(--turquesa-claro); box-shadow: 0 0 0 3px rgba(54,188,188,.12); }
+    .info { margin-top: 6px; color: var(--muted); font-size: 14px; }
+    .times-config { margin-top: 24px; text-align: center; }
+    .times-config label { margin-bottom: 10px; text-align: center; }
+    .seletor-times { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto; }
+    .controle-time {
+      width: 52px; min-width: 52px; height: 52px; flex: 0 0 52px; padding: 0;
+      border: 1px solid #44444c; border-radius: 12px; background: #303036;
+      color: var(--texto); font-size: 29px; font-weight: 700; line-height: 1;
+      cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .controle-time:active { transform: scale(.96); }
+    .controle-time:disabled { opacity: .35; cursor: not-allowed; }
+    .numero-times {
+      width: 78px; height: 52px; display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--borda); border-radius: 12px; background: var(--campo);
+      font-size: 25px; font-weight: 800; user-select: none;
+    }
+    .acoes { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+    .acoes button {
+      min-width: 190px; padding: 14px 18px; border: 0; border-radius: 10px;
+      color: white; font-size: 16px; font-weight: 800; cursor: pointer;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .sortear { background: var(--turquesa); }
+    .limpar { background: #303036; }
+    .erro { min-height: 20px; margin-top: 14px; color: #ff8989; font-weight: 700; text-align: center; }
+    .resultado-titulo { display: none; margin: 30px 0 14px; font-size: 24px; text-align: center; }
+    .times { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .time {
+      padding: 18px; border: 1px solid #34343a; border-top: 4px solid var(--turquesa);
+      border-radius: 14px; background: linear-gradient(180deg, #1d1d21, #151517);
+    }
+    .time h2 { margin: 0 0 12px; color: var(--turquesa-claro); font-size: 20px; }
+    .time ul { margin: 0; padding-left: 22px; line-height: 1.8; }
+    .contador { margin-top: 10px; color: #8e8e97; font-size: 13px; }
+    #selfTest { display: none; }
+    @media (max-width: 600px) {
+      body { padding: 14px; }
+      .card { padding: 16px; }
+      .acoes button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <img class="logo" src="logo-vcr.webp" alt="Logo VCR - Vôlei, Chimarrão e Resenha" />
+      <h1>Sorteio de Times</h1>
+      <div class="subtitle">VCR • Vôlei • Chimarrão • Resenha</div>
+    </header>
+
+    <section class="card">
+      <div>
+        <label for="nomes">Jogadores</label>
+        <textarea id="nomes" placeholder="Digite um jogador por linha:&#10;Gabriel&#10;João&#10;Pedro&#10;Lucas&#10;Marcos"></textarea>
+        <div class="info" id="quantidadeJogadores">0 jogadores adicionados</div>
+      </div>
+
+      <div class="times-config">
+        <label>Quantidade de times</label>
+        <div class="seletor-times">
+          <button type="button" class="controle-time" id="menosTime" aria-label="Diminuir quantidade de times">−</button>
+          <div class="numero-times" id="quantidadeTimes" aria-live="polite">2</div>
+          <button type="button" class="controle-time" id="maisTime" aria-label="Aumentar quantidade de times">+</button>
+        </div>
+      </div>
+
+      <div class="acoes">
+        <button type="button" class="sortear" id="sortear">🏐 Sortear times</button>
+        <button type="button" class="limpar" id="limpar">Limpar</button>
+      </div>
+
+      <div id="erro" class="erro" aria-live="polite"></div>
+    </section>
+
+    <h2 id="resultadoTitulo" class="resultado-titulo">Times sorteados</h2>
+    <section id="resultado" class="times"></section>
+    <div id="selfTest" data-status="not-run"></div>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const MIN_TIMES = 2;
+      const MAX_TIMES = 20;
+
+      const nomesEl = document.getElementById("nomes");
+      const quantidadeJogadoresEl = document.getElementById("quantidadeJogadores");
+      const quantidadeTimesEl = document.getElementById("quantidadeTimes");
+      const menosTimeBtn = document.getElementById("menosTime");
+      const maisTimeBtn = document.getElementById("maisTime");
+      const sortearBtn = document.getElementById("sortear");
+      const limparBtn = document.getElementById("limpar");
+      const erroEl = document.getElementById("erro");
+      const resultadoEl = document.getElementById("resultado");
+      const resultadoTituloEl = document.getElementById("resultadoTitulo");
+      const selfTestEl = document.getElementById("selfTest");
+
+      let quantidadeTimes = MIN_TIMES;
+
+      function obterNomes() {
+        return nomesEl.value
+          .split(/\r?\n/)
+          .map(function (nome) { return nome.trim(); })
+          .filter(function (nome) { return nome.length > 0; });
+      }
+
+      function atualizarContadorJogadores() {
+        const quantidade = obterNomes().length;
+        quantidadeJogadoresEl.textContent = quantidade + " " + (quantidade === 1 ? "jogador adicionado" : "jogadores adicionados");
+      }
+
+      function renderizarQuantidadeTimes() {
+        quantidadeTimesEl.textContent = String(quantidadeTimes);
+        menosTimeBtn.disabled = quantidadeTimes <= MIN_TIMES;
+        maisTimeBtn.disabled = quantidadeTimes >= MAX_TIMES;
+      }
+
+      function aumentarTimes() {
+        if (quantidadeTimes < MAX_TIMES) {
+          quantidadeTimes += 1;
+          renderizarQuantidadeTimes();
+        }
+      }
+
+      function diminuirTimes() {
+        if (quantidadeTimes > MIN_TIMES) {
+          quantidadeTimes -= 1;
+          renderizarQuantidadeTimes();
+        }
+      }
+
+      function embaralhar(lista) {
+        const copia = lista.slice();
+        for (let i = copia.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const temporario = copia[i];
+          copia[i] = copia[j];
+          copia[j] = temporario;
+        }
+        return copia;
+      }
+
+      function sortearTimes() {
+        erroEl.textContent = "";
+        resultadoEl.innerHTML = "";
+        resultadoTituloEl.style.display = "none";
+
+        const nomes = obterNomes();
+        if (nomes.length < 2) {
+          erroEl.textContent = "Adicione pelo menos 2 jogadores.";
+          return false;
+        }
+        if (quantidadeTimes > nomes.length) {
+          erroEl.textContent = "A quantidade de times não pode ser maior que a quantidade de jogadores.";
+          return false;
+        }
+
+        const sorteados = embaralhar(nomes);
+        const times = Array.from({ length: quantidadeTimes }, function () { return []; });
+        sorteados.forEach(function (nome, indice) { times[indice % quantidadeTimes].push(nome); });
+
+        times.forEach(function (time, indice) {
+          const card = document.createElement("article");
+          card.className = "time";
+          const titulo = document.createElement("h2");
+          titulo.textContent = "Time " + (indice + 1);
+          const lista = document.createElement("ul");
+          time.forEach(function (nome) {
+            const item = document.createElement("li");
+            item.textContent = nome;
+            lista.appendChild(item);
+          });
+          const contador = document.createElement("div");
+          contador.className = "contador";
+          contador.textContent = time.length + " " + (time.length === 1 ? "jogador" : "jogadores");
+          card.appendChild(titulo);
+          card.appendChild(lista);
+          card.appendChild(contador);
+          resultadoEl.appendChild(card);
+        });
+
+        resultadoTituloEl.style.display = "block";
+        if (typeof resultadoTituloEl.scrollIntoView === "function") {
+          resultadoTituloEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return true;
+      }
+
+      function limparTudo() {
+        nomesEl.value = "";
+        quantidadeTimes = MIN_TIMES;
+        erroEl.textContent = "";
+        resultadoEl.innerHTML = "";
+        resultadoTituloEl.style.display = "none";
+        atualizarContadorJogadores();
+        renderizarQuantidadeTimes();
+        nomesEl.focus();
+      }
+
+      menosTimeBtn.addEventListener("click", diminuirTimes);
+      maisTimeBtn.addEventListener("click", aumentarTimes);
+      sortearBtn.addEventListener("click", sortearTimes);
+      limparBtn.addEventListener("click", limparTudo);
+      nomesEl.addEventListener("input", atualizarContadorJogadores);
+
+      atualizarContadorJogadores();
+      renderizarQuantidadeTimes();
+
+      if (window.location.search.indexOf("test=1") !== -1) {
+        const resultados = [];
+        resultados.push(["inicial", quantidadeTimes === 2]);
+        maisTimeBtn.click();
+        resultados.push(["botao_mais", quantidadeTimes === 3 && quantidadeTimesEl.textContent === "3"]);
+        menosTimeBtn.click();
+        resultados.push(["botao_menos", quantidadeTimes === 2 && quantidadeTimesEl.textContent === "2"]);
+        nomesEl.value = "Ana\nBruno\nCarla\nDiego";
+        nomesEl.dispatchEvent(new Event("input", { bubbles: true }));
+        maisTimeBtn.click();
+        const sorteioOk = sortearTimes();
+        resultados.push(["contador_jogadores", quantidadeJogadoresEl.textContent.indexOf("4 jogadores") === 0]);
+        resultados.push(["sorteio", sorteioOk && resultadoEl.children.length === 3]);
+        const passou = resultados.every(function (item) { return item[1]; });
+        selfTestEl.textContent = (passou ? "PASS:" : "FAIL:") + resultados.map(function (item) { return item[0] + "=" + item[1]; }).join(",");
+        selfTestEl.setAttribute("data-status", passou ? "pass" : "fail");
+      }
+    })();
+  </script>
+</body>
+</html>
